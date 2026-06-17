@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
-  listHistory: () => ipcRenderer.invoke('history:list'),
+  listHistory: (limit, beforeId) => ipcRenderer.invoke('history:list', { limit, beforeId }),
   getSettings: () => ipcRenderer.invoke('config:get'),
   setHotkey: (name) => ipcRenderer.invoke('config:setHotkey', name),
   setModelPath: (p) => ipcRenderer.invoke('config:setModelPath', p),

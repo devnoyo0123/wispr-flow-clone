@@ -31,10 +31,16 @@ function insertTranscription(text) {
     .get(info.lastInsertRowid);
 }
 
-function listRecent(limit = 100) {
+function listRecent(limit = 50, beforeId = null) {
+  // cursor 기반 페이지네이션: beforeId 보다 오래된 N개 (무한 스크롤)
+  if (beforeId == null) {
+    return getDb()
+      .prepare('SELECT id, text, created_at FROM transcriptions ORDER BY id DESC LIMIT ?')
+      .all(limit);
+  }
   return getDb()
-    .prepare('SELECT id, text, created_at FROM transcriptions ORDER BY id DESC LIMIT ?')
-    .all(limit);
+    .prepare('SELECT id, text, created_at FROM transcriptions WHERE id < ? ORDER BY id DESC LIMIT ?')
+    .all(beforeId, limit);
 }
 
 module.exports = { insertTranscription, listRecent };

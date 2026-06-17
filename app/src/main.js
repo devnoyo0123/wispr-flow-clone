@@ -185,8 +185,8 @@ function startHelper() {
 }
 
 // IPC
-ipcMain.handle('history:list', () => {
-  try { return db.listRecent(100); }
+ipcMain.handle('history:list', (_e, opts = {}) => {
+  try { return db.listRecent(opts.limit ?? 50, opts.beforeId ?? null); }
   catch (e) { setStatus('db: ' + e.message); return []; }
 });
 ipcMain.handle('config:get', () => config.store);
