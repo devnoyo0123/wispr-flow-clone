@@ -53,7 +53,7 @@ function setState(st) {
     case 'error':
       pill.classList.add('error');
       title.textContent = '오류';
-      sub.textContent = (st.message || '').slice(0, 34);
+      sub.textContent = (st.message || '').slice(0, 140);
       break;
     case 'hidden':
       pill.classList.add('hidden');

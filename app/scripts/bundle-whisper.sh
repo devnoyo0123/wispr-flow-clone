@@ -29,8 +29,14 @@ install_name_tool -id "@loader_path/libggml-base.0.dylib"  "$DST/libggml-base.0.
 # libwhisper → ggml
 install_name_tool -change "$GGML/libggml.0.dylib"          "@loader_path/libggml.0.dylib"      "$DST/libwhisper.1.dylib" 2>/dev/null || true
 install_name_tool -change "$GGML/libggml-base.0.dylib"     "@loader_path/libggml-base.0.dylib" "$DST/libwhisper.1.dylib" 2>/dev/null || true
-# libggml → libggml-base
+# libggml → libggml-base (절대경로 + @rpath 두 형태 모두 커버 — 누락 시 dyld 로드 실패)
 install_name_tool -change "$GGML/libggml-base.0.dylib"     "@loader_path/libggml-base.0.dylib" "$DST/libggml.0.dylib"    2>/dev/null || true
+install_name_tool -change "@rpath/libggml-base.0.dylib"    "@loader_path/libggml-base.0.dylib" "$DST/libggml.0.dylib"    2>/dev/null || true
+
+echo "→ adhoc 재서명 (install_name_tool 로 무효화된 서명 복구 — 안 하면 electron spawn 시 SIGKILL)"
+for f in whisper-cli libwhisper.1.dylib libggml.0.dylib libggml-base.0.dylib; do
+  codesign --force --sign - "$DST/$f" 2>/dev/null || true
+done
 
 chmod +x "$DST/whisper-cli"
 echo "→ 완료:"

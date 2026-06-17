@@ -185,7 +185,10 @@ function startHelper() {
 }
 
 // IPC
-ipcMain.handle('history:list', () => db.listRecent(100).catch((e) => { setStatus('db: ' + e.message); return []; }));
+ipcMain.handle('history:list', () => {
+  try { return db.listRecent(100); }
+  catch (e) { setStatus('db: ' + e.message); return []; }
+});
 ipcMain.handle('config:get', () => config.store);
 ipcMain.handle('config:setHotkey', (_e, name) => {
   config.set('hotkey', name);

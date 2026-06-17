@@ -25,16 +25,20 @@ function transcribe(wavPath) {
     const p = spawn(whisperPath, args, { stdio: ['ignore', 'pipe', 'pipe'] });
 
     const segs = [];
+    let errBuf = '';
     p.stdout.on('data', (d) => {
       for (const raw of d.toString().split('\n')) {
         const m = raw.match(SEG);
         if (m && m[1].trim()) segs.push(m[1].trim());
       }
     });
-    p.stderr.on('data', () => {}); // discard model/BLAS logs
+    p.stderr.on('data', (d) => { errBuf += d.toString(); }); // 원인 파악용 수집
     p.on('error', reject);
-    p.on('close', (code) => {
-      if (code !== 0) return reject(new Error(`whisper-cli exited ${code}`));
+    p.on('close', (code, signal) => {
+      if (code !== 0) {
+        const tail = errBuf.slice(-500).replace(/\n/g, ' ');
+        return reject(new Error(`whisper-cli exited code=${code} signal=${signal}${tail ? ' :: ' + tail : ''}`));
+      }
       resolve(segs.join(' ').trim());
     });
   });
