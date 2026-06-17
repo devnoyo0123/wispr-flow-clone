@@ -1,6 +1,6 @@
 # 🎙️ Wispr Flow Clone
 
-macOS용 **push-to-talk 음성 받아쓰기** 데스크톱 앱. 단축키를 누른 채 말하면 → 로컬 [whisper.cpp](https://github.com/ggerganov/whisper.cpp) 로 한국어(또는 설정 언어) 변환 → 현재 커서 위치에 텍스트를 붙여넣고, 변환 기록을 Postgres에 저장합니다. 외부 클라우드/SaaS 없이 **전부 로컬**에서 동작합니다.
+macOS용 **push-to-talk 음성 받아쓰기** 데스크톱 앱. 단축키를 누른 채 말하면 → 로컬 [whisper.cpp](https://github.com/ggerganov/whisper.cpp) 로 한국어(또는 설정 언어) 변환 → 현재 커서 위치에 텍스트를 붙여넣고, 변환 기록을 **로컬 SQLite**에 저장합니다. 외부 클라우드/SaaS 없이 **전부 로컬**에서 동작합니다.
 
 > [Wispr Flow](https://wisprflow.ai/) 의 기능 일부를 개인 학습/실험용으로 클론한 프로젝트입니다.
 
@@ -11,8 +11,9 @@ macOS용 **push-to-talk 음성 받아쓰기** 데스크톱 앱. 단축키를 누
 - 전역 단축키 **홀드=녹음 / 떼면=변환** (CGEventTap 기반)
 - 로컬 whisper.cpp 변환 — 오프라인, 데이터 외부 유출 없음
 - 변환 결과를 **활성 커서**에 자동 붙여넣기 (어느 앱이든)
+- **화면 하단 floating overlay** 로 녹음/변환/완료 상태 표시
 - UI에서 단축키 / 모델 경로 변경
-- 변환 기록을 **Postgres**에 영구 저장 + 앱 UI 리스트
+- 변환 기록을 **로컬 SQLite**에 저장 + 앱 UI 리스트 (외부 DB 불필요)
 - 트레이 + 윈도우 앱 (메뉴바 마이크 아이콘)
 
 ---
@@ -23,19 +24,19 @@ macOS용 **push-to-talk 음성 받아쓰기** 데스크톱 앱. 단축키를 누
 .
 ├── app/                      # Electron 앱
 │   ├── src/
-│   │   ├── main.js           # 메인: 트레이/윈도우/오케스트레이션
+│   │   ├── main.js           # 메인: 트레이/윈도우/overlay/오케스트레이션
 │   │   ├── preload.js        # renderer IPC 노출
+│   │   ├── overlay-preload.js# overlay(HUD) IPC
 │   │   ├── config.js         # 설정(electron-store)
-│   │   ├── db.js             # Postgres(pg)
+│   │   ├── db.js             # SQLite(better-sqlite3) — userData/wispr.db
 │   │   ├── transcriber.js    # whisper-cli 호출 + 파싱
 │   │   └── helper-bridge.js  # 네이티브 헬퍼 spawn + stdio JSON IPC
-│   ├── renderer/             # UI(기록 리스트 + 설정)
-│   └── native/
-│       └── wispr-helper.swift# CGEventTap/녹음/붙여넣기 네이티브 헬퍼
+│   ├── renderer/             # UI(기록 리스트 + 설정) + overlay
+│   ├── native/
+│   │   └── wispr-helper.swift# CGEventTap/녹음/붙여넣기 네이티브 헬퍼
+│   └── build/                # 앱 아이콘(icon.svg → icon.icns)
 ├── spike/                    # 단계별 프로토타입 스파이크(tap/rec/ptt 실험)
-├── memory-bank/              # 설계/스펙 문서
-├── docker-compose.yml        # Postgres 16
-└── schema.sql                # transcriptions 테이블
+└── memory-bank/              # 설계/스펙 문서
 ```
 
 ---
@@ -44,7 +45,6 @@ macOS용 **push-to-talk 음성 받아쓰기** 데스크톱 앱. 단축키를 누
 
 - **macOS** (Apple Silicon 권장 — 헬퍼가 CGEventTap/AVFoundation 사용)
 - **Node.js** 18+
-- **Docker** (Postgres용)
 - **whisper.cpp** — Homebrew 설치:
   ```bash
   brew install whisper-cpp
@@ -52,29 +52,24 @@ macOS용 **push-to-talk 음성 받아쓰기** 데스크톱 앱. 단축키를 누
 - **Whisper 모델** `ggml-large-v3.bin` — 별도 다운로드 필요 (3GB, 레포에 포함되지 않음):
   ```bash
   mkdir -p spike/models
-  # ggml 모델을 아래 경로에 배치 (또는 앱 UI에서 경로 지정)
+  curl -L -o spike/models/ggml-large-v3.bin \
+    https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin
   ```
+  > 가벼운 모델로 테스트하려면 `ggml-large-v3.bin` 대신 `ggml-base.bin`(~148MB) 사용. 모델 경로는 앱 UI에서도 변경 가능.
 
 ---
 
 ## 🚀 설치 및 실행
 
 ```bash
-# 1. 의존성 설치
 cd app
 npm install
-
-# 2. (필요시) 네이티브 헬퍼 빌드
-npm run build:helper        # swiftc 로 wispr-helper 컴파일
-
-# 3. Postgres 기동 (프로젝트 루트에서)
-cd ..
-docker compose up -d db
-
-# 4. 앱 실행
-cd app
+npm run rebuild           # better-sqlite3 네이티브를 electron 용으로 빌드
+npm run build:helper      # (필요시) 네이티브 헬퍼 컴파일
 npm start
 ```
+
+> 외부 DB(Postgres/Docker)는 **불필요**합니다. 기록은 앱 설정 폴더의 `wispr.db`(SQLite)에 자동 저장됩니다.
 
 실행하면 480×680 창이 뜨고 메뉴바에 마이크 아이콘이 나타납니다.
 
@@ -134,11 +129,31 @@ npm run dist          # → app/dist/ 에 .app + .dmg 생성
 1. 텍스트를 입력할 앱(TextEdit, 브라우저 입력창, 메신저 등)에 **커서**를 둡니다.
 2. 설정한 단축키(기본 **오른쪽 Command ⌘**)를 **누르고 있는 동안** 말합니다.
 3. **떼면** → 변환된 텍스트가 커서에 붙여넣어지고, 앱 기록 리스트 최상단에 추가됩니다.
+   - 녹음 중에는 화면 하단에 `🔴 녹음 중` overlay가, 변환 후에는 `✓ 완료` 가 잠깐 표시됩니다.
 
 ### 설정 (앱 UI)
 
 - **단축키**: Right Cmd / Right Option / Left Cmd / Left Option / Right·Left Control
 - **Whisper 모델 경로**: 입력 후 저장
+
+---
+
+## 🗑 Uninstall (제거)
+
+macOS 앱은 별도의 uninstaller가 없습니다. 아래 절차로 수동 제거하세요.
+
+**1. 앱 삭제** — 응용프로그램 폴더에서 `Wispr Flow Clone.app`을 **휴지통**으로 드래그(또는 우클릭 → 휴지통).
+
+**2. 완전 제거** (설정·기록 DB까지 지울 때):
+```bash
+rm -rf "/Applications/Wispr Flow Clone.app"
+rm -rf ~/Library/Application\ Support/Wispr\ Flow\ Clone/   # 설정 + wispr.db (기록)
+```
+
+> 💡 개발 모드(`npm start`)의 설정/DB는 별도 경로에 있습니다:
+> `~/Library/Application Support/wispr-flow-clone/`
+
+> ℹ️ whisper.cpp 모델 파일은 사용자가 직접 다운로드한 것이므로, 필요하면 `spike/models/*.bin`을 따로 지우세요.
 
 ---
 
@@ -149,12 +164,14 @@ npm run dist          # → app/dist/ 에 .app + .dmg 생성
 | `FATAL: CGEventTap creation failed` | 입력 모니터링 권한 미부여 |
 | 녹음 후 빈 결과 / `AVAudioRecorder start failed` | 마이크 권한 미부여 |
 | 변환은 되는데 안 붙음 | 손쉬운 사용 권한 미부여 |
-| `db: ...` status | Postgres 미기동 → `docker compose up -d db` |
+| 변환 자체가 안 됨 | `whisper-cli` 미설치 → `brew install whisper-cpp` 또는 모델 경로 확인 |
+| `better-sqlite3` 로드 에러 | `npm run rebuild` 로 electron 용 재빌드 |
 | 창이 안 보임 | 메뉴바 마이크 아이콘 클릭 또는 앱 재실행 |
 
-기록 확인:
+기록 확인 (SQLite):
 ```bash
-docker compose exec db psql -U wispr -d wispr -c 'SELECT * FROM transcriptions ORDER BY id DESC LIMIT 10;'
+sqlite3 ~/Library/Application\ Support/wispr-flow-clone/wispr.db \
+  'SELECT id, created_at, substr(text,1,40) FROM transcriptions ORDER BY id DESC LIMIT 10;'
 ```
 
 ---

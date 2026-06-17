@@ -6,18 +6,17 @@
   "main": "src/main.js",
   "scripts": {
     "build:helper": "swiftc native/wispr-helper.swift -o native/wispr-helper -framework Cocoa -framework AVFoundation",
-    "db:up": "(cd .. && docker compose up -d db)",
-    "db:down": "(cd .. && docker compose down)",
-    "db:init": "(cd .. && docker compose down -v && docker compose up -d db)",
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
     "start": "electron .",
     "dist": "electron-builder --mac",
     "dist:fast": "electron-builder --mac --dir"
   },
   "dependencies": {
-    "electron-store": "^8.2.0",
-    "pg": "^8.13.0"
+    "better-sqlite3": "^12.11.1",
+    "electron-store": "^8.2.0"
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.4",
     "electron": "^33.0.0",
     "electron-builder": "^26.15.3"
   },
@@ -35,7 +34,12 @@
       "category": "public.app-category.productivity",
       "icon": "build/icon.icns",
       "target": [
-        { "target": "dmg", "arch": ["arm64"] }
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        }
       ],
       "hardenedRuntime": false,
       "gatekeeperAssess": false,
@@ -44,8 +48,16 @@
     "dmg": {
       "title": "Wispr Flow Clone",
       "contents": [
-        { "x": 130, "y": 220 },
-        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
       ]
     }
   }

@@ -1,5 +1,4 @@
 const Store = require('electron-store');
-const path = require('path');
 
 const store = new Store({
   name: 'wispr-config',
@@ -7,14 +6,8 @@ const store = new Store({
     hotkey: 'rightCmd',
     language: 'ko',
     whisperPath: '/opt/homebrew/bin/whisper-cli',
-    modelPath: path.resolve(__dirname, '../../spike/models/ggml-large-v3.bin'),
-    db: {
-      host: '127.0.0.1',
-      port: 55432,
-      user: 'wispr',
-      password: 'wispr',
-      database: 'wispr',
-    },
+    // 현재 보유 모델(large-v3) 절대경로 — 개발/정식 .app 모두에서 동일하게 사용
+    modelPath: '/Users/colosseum_nohys/Documents/my/playground/wispr-flow-clone/spike/models/ggml-large-v3.bin',
   },
 });
 

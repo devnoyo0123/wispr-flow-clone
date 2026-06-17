@@ -1,22 +1,40 @@
-const { Pool } = require('pg');
-const config = require('./config');
+const Database = require('better-sqlite3');
+const { app } = require('electron');
+const path = require('path');
 
-const pool = new Pool(config.get('db'));
+// Postgres 대신 로컬 SQLite 파일 사용 (외부 DB/Docker 불필요).
+// 인터페이스(insertTranscription / listRecent)는 기존과 동일 → main.js 변경 없음.
 
-async function insertTranscription(text) {
-  const r = await pool.query(
-    'INSERT INTO transcriptions(text) VALUES($1) RETURNING id, created_at, text',
-    [text],
-  );
-  return r.rows[0];
+let db = null;
+
+function getDb() {
+  if (!db) {
+    const file = path.join(app.getPath('userData'), 'wispr.db');
+    db = new Database(file);
+    db.pragma('journal_mode = WAL');
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS transcriptions (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        text       TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+      );
+    `);
+  }
+  return db;
 }
 
-async function listRecent(limit = 100) {
-  const r = await pool.query(
-    'SELECT id, created_at, text FROM transcriptions ORDER BY created_at DESC LIMIT $1',
-    [limit],
-  );
-  return r.rows;
+function insertTranscription(text) {
+  const d = getDb();
+  const info = d.prepare('INSERT INTO transcriptions (text) VALUES (?)').run(text);
+  return d
+    .prepare('SELECT id, text, created_at FROM transcriptions WHERE id = ?')
+    .get(info.lastInsertRowid);
 }
 
-module.exports = { pool, insertTranscription, listRecent };
+function listRecent(limit = 100) {
+  return getDb()
+    .prepare('SELECT id, text, created_at FROM transcriptions ORDER BY id DESC LIMIT ?')
+    .all(limit);
+}
+
+module.exports = { insertTranscription, listRecent };
