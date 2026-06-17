@@ -9,13 +9,44 @@
     "db:up": "(cd .. && docker compose up -d db)",
     "db:down": "(cd .. && docker compose down)",
     "db:init": "(cd .. && docker compose down -v && docker compose up -d db)",
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder --mac",
+    "dist:fast": "electron-builder --mac --dir"
   },
   "dependencies": {
     "electron-store": "^8.2.0",
     "pg": "^8.13.0"
   },
   "devDependencies": {
-    "electron": "^33.0.0"
+    "electron": "^33.0.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.devnoyo0123.wispr-flow-clone",
+    "productName": "Wispr Flow Clone",
+    "asar": false,
+    "files": [
+      "src/**/*",
+      "renderer/**/*",
+      "native/wispr-helper",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "target": [
+        { "target": "dmg", "arch": ["arm64"] }
+      ],
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "identity": null
+    },
+    "dmg": {
+      "title": "Wispr Flow Clone",
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ]
+    }
   }
 }

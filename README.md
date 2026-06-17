@@ -94,6 +94,41 @@ npm start
 
 ---
 
+## 📦 정식 앱으로 빌드 (.app / .dmg)
+
+개발 모드(`npm start`) 대신 일반 macOS 앱처럼 **아이콘 클릭으로 실행**하려면 [electron-builder](https://www.electron.build/) 로 `.app` + `.dmg` 를 만듭니다.
+
+### 1. 빌드하기 (app 디렉토리에서)
+
+```bash
+cd app
+npm run dist          # → app/dist/ 에 .app + .dmg 생성
+# 또는 dmg 없이 .app만 빠르게: npm run dist:fast
+```
+
+결과:
+- `app/dist/Wispr Flow Clone-0.1.0-arm64.dmg` — 배포/설치용 디스크 이미지
+- `app/dist/mac-arm64/Wispr Flow Clone.app` — 앱 번들
+
+> 빌드 설정은 `app/package.json` 의 `build` 항목, 앱 아이콘은 `app/build/icon.svg` → `icon.icns` 를 수정하세요. 아이콘 재생성: `rsvg-convert -w 1024 build/icon.svg ...` → `iconutil -c icns` .
+
+### 2. .dmg 로 설치 & 실행
+
+1. `Wispr Flow Clone-0.1.0-arm64.dmg` 를 **더블클릭**합니다.
+2. 열리는 창에서 🎙️ 앱 아이콘을 → **응용프로그램** 폴더로 **드래그**합니다.
+3. **첫 실행 — Gatekeeper 우회** (코드 서명을 안 했기 때문에 "확인할 수 없는 개발자" 경고가 뜹니다):
+   - 응용프로그램에서 **Wispr Flow Clone 을 우클릭 → 열기** → "열기" 클릭
+   - 또는 터미널: `xattr -cr "/Applications/Wispr Flow Clone.app"`
+4. **macOS 권한 재부여** ⚠️ — 설치한 `.app` 는 개발 모드(`npm start`)와 **다른 앱**으로 인식되므로 아래 권한을 **다시** 부여해야 합니다:
+   - 시스템 설정 → 개인정보 보호 및 보안 → **입력 모니터링 · 손쉬운 사용 · 마이크** (Wispr Flow Clone 에 ON)
+   - 부여 후 앱 **완전 재시작**
+
+이제 Launchpad / 독에서 🎙️ 아이콘 클릭으로 실행할 수 있습니다.
+
+> 💡 불특정 다수에게 배포하려면 Apple Developer 계정($99/년)으로 **코드 서명 + 공증(notarization)** 이 필요합니다. 개인/팀 내 사용이라면 위 우회 방법으로 충분합니다.
+
+---
+
 ## 🎯 사용법
 
 1. 텍스트를 입력할 앱(TextEdit, 브라우저 입력창, 메신저 등)에 **커서**를 둡니다.

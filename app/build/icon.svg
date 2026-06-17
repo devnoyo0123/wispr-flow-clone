@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#6D28D9"/>
+    </linearGradient>
+    <linearGradient id="mic" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EDE9FE"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 배경 (둥근 사각형; macOS 가 squircle 마스크 적용) -->
+  <rect width="1024" height="1024" rx="228" ry="228" fill="url(#bg)"/>
+
+  <!-- 마이크 -->
+  <g>
+    <!-- 헤드(캡슐) -->
+    <rect x="420" y="272" width="184" height="268" rx="92" ry="92" fill="url(#mic)"/>
+    <!-- 받침 U자 곡선 -->
+    <path d="M 392 512 Q 392 650 512 650 Q 632 650 632 512"
+          fill="none" stroke="url(#mic)" stroke-width="34" stroke-linecap="round"/>
+    <!-- 스탠드 -->
+    <rect x="500" y="648" width="24" height="68" fill="url(#mic)"/>
+    <!-- 베이스 -->
+    <rect x="436" y="716" width="152" height="28" rx="14" ry="14" fill="url(#mic)"/>
+  </g>
+</svg>
