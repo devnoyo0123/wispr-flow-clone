@@ -25,6 +25,11 @@ function setState(st) {
   sub.textContent = '';
 
   switch (st.state) {
+    case 'downloading':
+      pill.classList.add('downloading');
+      title.textContent = '모델 다운로드';
+      sub.textContent = (st.percent || 0) + '%';
+      break;
     case 'recording':
       pill.classList.add('recording');
       title.textContent = '녹음 중';

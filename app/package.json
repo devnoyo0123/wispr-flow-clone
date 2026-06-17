@@ -6,10 +6,11 @@
   "main": "src/main.js",
   "scripts": {
     "build:helper": "swiftc native/wispr-helper.swift -o native/wispr-helper -framework Cocoa -framework AVFoundation",
+    "bundle:whisper": "bash scripts/bundle-whisper.sh",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "start": "electron .",
-    "dist": "electron-builder --mac",
-    "dist:fast": "electron-builder --mac --dir"
+    "dist": "npm run bundle:whisper && electron-builder --mac",
+    "dist:fast": "npm run bundle:whisper && electron-builder --mac --dir"
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",
@@ -27,7 +28,7 @@
     "files": [
       "src/**/*",
       "renderer/**/*",
-      "native/wispr-helper",
+      "native/**",
       "package.json"
     ],
     "mac": {

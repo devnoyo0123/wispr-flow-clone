@@ -4,6 +4,7 @@ package-lock.json
 
 # build artifacts
 app/native/wispr-helper
+app/native/whisper/
 *.o
 
 # recordings / temp

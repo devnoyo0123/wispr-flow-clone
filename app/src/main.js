@@ -5,6 +5,7 @@ const config = require('./config');
 const db = require('./db');
 const { transcribe } = require('./transcriber');
 const { HelperBridge } = require('./helper-bridge');
+const model = require('./model-downloader');
 
 let tray, win, overlay, helper;
 let busy = false;
@@ -64,6 +65,23 @@ function createOverlay() {
   overlay.loadFile(path.join(__dirname, '..', 'renderer', 'overlay.html'));
   overlay.once('ready-to-show', positionOverlay);
   screen.on('display-metrics-changed', positionOverlay);
+}
+
+// --- 모델 자동 준비 (modelPath 가 비어있거나 파일이 없으면 large-v3 다운로드) ---
+async function ensureModel() {
+  const p = config.get('modelPath');
+  if (p && fs.existsSync(p)) return;
+  setOverlay({ state: 'downloading', percent: 0 });
+  try {
+    const dest = await model.download('large-v3', (got, total) => {
+      const pct = total ? Math.round((got / total) * 100) : 0;
+      setOverlay({ state: 'downloading', percent: pct });
+    });
+    config.set('modelPath', dest);
+    flashOverlay({ state: 'done', preview: '모델 다운로드 완료' }, 1500);
+  } catch (e) {
+    flashOverlay({ state: 'error', message: '모델 다운로드 실패: ' + (e.message || e) });
+  }
 }
 
 async function handleRecordingStopped(msg) {
@@ -176,10 +194,11 @@ ipcMain.handle('config:setHotkey', (_e, name) => {
 });
 ipcMain.handle('config:setModelPath', (_e, p) => { config.set('modelPath', p); return true; });
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   createTray();
   createWindow();
   createOverlay();
+  await ensureModel();   // 모델 준비 (필요시 자동 다운로드)
   startHelper();
 });
 app.on('window-all-closed', () => app.quit());

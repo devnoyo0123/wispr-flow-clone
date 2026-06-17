@@ -31,6 +31,7 @@ body {
 .pill.recording .icon { background: #ff4d4f; animation: pulse 1.1s ease-in-out infinite; }
 .pill.transcribing .icon { background: #3b82f6; }
 .pill.done .icon { background: #22c55e; }
+.pill.downloading .icon { background: #8b5cf6; }
 .pill.empty .icon { background: #9ca3af; }
 .pill.error .icon { background: #f59e0b; }
 @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.4; } }

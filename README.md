@@ -45,17 +45,13 @@ macOS용 **push-to-talk 음성 받아쓰기** 데스크톱 앱. 단축키를 누
 
 - **macOS** (Apple Silicon 권장 — 헬퍼가 CGEventTap/AVFoundation 사용)
 - **Node.js** 18+
-- **whisper.cpp** — Homebrew 설치:
+- **whisper.cpp**(빌드용) — 번들 생성을 위해서만 Homebrew 설치:
   ```bash
   brew install whisper-cpp
   ```
-- **Whisper 모델** `ggml-large-v3.bin` — 별도 다운로드 필요 (3GB, 레포에 포함되지 않음):
-  ```bash
-  mkdir -p spike/models
-  curl -L -o spike/models/ggml-large-v3.bin \
-    https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin
-  ```
-  > 가벼운 모델로 테스트하려면 `ggml-large-v3.bin` 대신 `ggml-base.bin`(~148MB) 사용. 모델 경로는 앱 UI에서도 변경 가능.
+  > `npm run bundle:whisper` 가 이 whisper-cli 바이너리(+dylib)를 앱 안으로 복사합니다. **최종 사용자는 whisper-cpp 설치 불필요.**
+- **Whisper 모델** — **첫 실행 시 자동 다운로드** (large-v3, ~3GB). 별도 준비 불필요.
+  > 모델을 미리 받아두거나 경로를 바꾸려면 앱 UI(Whisper 모델 경로)에서 설정.
 
 ---
 
@@ -65,11 +61,14 @@ macOS용 **push-to-talk 음성 받아쓰기** 데스크톱 앱. 단축키를 누
 cd app
 npm install
 npm run rebuild           # better-sqlite3 네이티브를 electron 용으로 빌드
+npm run bundle:whisper    # whisper-cli(+dylib)를 앱 안으로 번들 (Homebrew whisper-cpp 필요)
 npm run build:helper      # (필요시) 네이티브 헬퍼 컴파일
 npm start
 ```
 
-> 외부 DB(Postgres/Docker)는 **불필요**합니다. 기록은 앱 설정 폴더의 `wispr.db`(SQLite)에 자동 저장됩니다.
+> - 외부 DB(Postgres/Docker)는 **불필요** — 기록은 `wispr.db`(SQLite)에 자동 저장.
+> - 모델은 **첫 실행 시 자동 다운로드** (large-v3, ~3GB). overlay에 진행률 표시.
+> - whisper-cli는 앱 안에 **번들 포함** — Homebrew 없이 동작.
 
 실행하면 480×680 창이 뜨고 메뉴바에 마이크 아이콘이 나타납니다.
 

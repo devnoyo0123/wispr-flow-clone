@@ -5,9 +5,9 @@ const store = new Store({
   defaults: {
     hotkey: 'rightCmd',
     language: 'ko',
-    whisperPath: '/opt/homebrew/bin/whisper-cli',
-    // 현재 보유 모델(large-v3) 절대경로 — 개발/정식 .app 모두에서 동일하게 사용
-    modelPath: '/Users/colosseum_nohys/Documents/my/playground/wispr-flow-clone/spike/models/ggml-large-v3.bin',
+    whisperPath: 'whisper-cli',
+    // 빈 값이면 부팅 시 ensureModel() 이 large-v3 를 자동 다운로드(userData/models/) 후 세팅
+    modelPath: '',
   },
 });
 
