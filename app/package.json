@@ -1,6 +1,6 @@
 {
   "name": "klaktalk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Wispr Flow clone — push-to-talk voice dictation for macOS",
   "private": true,
   "main": "src/main.js",
