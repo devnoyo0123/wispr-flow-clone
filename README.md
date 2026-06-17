@@ -177,4 +177,7 @@ sqlite3 ~/Library/Application\ Support/klaktalk/wispr.db \
 
 ## 📄 라이선스
 
-개인 학습용 프로젝트.
+- 코드: **MIT**
+- [whisper.cpp](https://github.com/ggerganov/whisper.cpp): MIT (ggerganov)
+- Whisper 모델: OpenAI
+- "Wispr Flow" 상표는 본 프로젝트와 무관함
