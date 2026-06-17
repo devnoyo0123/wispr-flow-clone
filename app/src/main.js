@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage } = require('electron');
+const { app, BrowserWindow, Tray, Menu, ipcMain, nativeImage, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const config = require('./config');
@@ -6,17 +6,71 @@ const db = require('./db');
 const { transcribe } = require('./transcriber');
 const { HelperBridge } = require('./helper-bridge');
 
-let tray, win, helper;
+let tray, win, overlay, helper;
 let busy = false;
 
 function setStatus(s) {
   if (win && !win.isDestroyed()) win.webContents.send('status', String(s));
 }
 
+// --- floating overlay (HUD) ---
+function positionOverlay() {
+  if (!overlay || overlay.isDestroyed()) return;
+  const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+  const b = overlay.getBounds();
+  // 화면 하단 중앙 (독 위 90px)
+  overlay.setPosition(Math.round((width - b.width) / 2), height - b.height - 90, false);
+}
+
+function setOverlay(state) {
+  if (!overlay || overlay.isDestroyed()) return;
+  const wc = overlay.webContents;
+  const send = () => wc.send('hud:state', state);
+  if (wc.isLoading()) wc.once('did-finish-load', send);
+  else send();
+  if (state.state && state.state !== 'hidden') overlay.showInactive();
+}
+
+// 잠깐 띄웠다가 사라지는 상태 (완료/빈결과/오류)
+function flashOverlay(state, ms = 1700) {
+  setOverlay(state);
+  setTimeout(() => {
+    setOverlay({ state: 'hidden' });
+    if (overlay && !overlay.isDestroyed()) overlay.hide();
+  }, ms);
+}
+
+function createOverlay() {
+  overlay = new BrowserWindow({
+    width: 380,
+    height: 84,
+    show: false,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    movable: false,
+    alwaysOnTop: true,
+    level: 'floating',
+    visibleOnAllWorkspaces: true,
+    skipTaskbar: true,
+    hasShadow: false,
+    focusable: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'overlay-preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  });
+  overlay.loadFile(path.join(__dirname, '..', 'renderer', 'overlay.html'));
+  overlay.once('ready-to-show', positionOverlay);
+  screen.on('display-metrics-changed', positionOverlay);
+}
+
 async function handleRecordingStopped(msg) {
-  if (busy) { setStatus('busy — skipped'); return; }
+  if (busy) { setStatus('busy — skipped'); flashOverlay({ state: 'empty' }, 900); return; }
   busy = true;
   setStatus('transcribing…');
+  setOverlay({ state: 'transcribing' });
   try {
     const text = await transcribe(msg.wav);
     const clean = (text || '').trim();
@@ -25,11 +79,14 @@ async function handleRecordingStopped(msg) {
       const row = await db.insertTranscription(clean);
       if (win && !win.isDestroyed()) win.webContents.send('transcription:added', row);
       setStatus('idle');
+      flashOverlay({ state: 'done', preview: clean });
     } else {
       setStatus('empty transcription');
+      flashOverlay({ state: 'empty' });
     }
   } catch (e) {
     setStatus('error: ' + (e.message || e));
+    flashOverlay({ state: 'error', message: e.message || String(e) });
   } finally {
     busy = false;
     try { fs.unlinkSync(msg.wav); } catch {}
@@ -94,11 +151,17 @@ function createWindow() {
 
 function startHelper() {
   helper = new HelperBridge();
-  helper.on('recording_started', () => setStatus('● recording…'));
+  helper.on('recording_started', () => {
+    setStatus('● recording…');
+    setOverlay({ state: 'recording' });
+  });
   helper.on('recording_stopped', (m) => handleRecordingStopped(m));
   helper.on('hotkey_set', (m) => setStatus('hotkey: ' + m.hotkey));
   helper.on('error', (m) => setStatus('helper error: ' + (m.message || '')));
-  helper.on('fatal', (m) => setStatus('FATAL: ' + (m.message || '')));
+  helper.on('fatal', (m) => {
+    setStatus('FATAL: ' + (m.message || ''));
+    flashOverlay({ state: 'error', message: m.message || 'fatal' });
+  });
   helper.on('exit', (code) => setStatus('helper exited ' + code));
   helper.start();
 }
@@ -116,6 +179,7 @@ ipcMain.handle('config:setModelPath', (_e, p) => { config.set('modelPath', p); r
 app.whenReady().then(() => {
   createTray();
   createWindow();
+  createOverlay();
   startHelper();
 });
 app.on('window-all-closed', () => app.quit());
