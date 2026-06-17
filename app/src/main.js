@@ -88,7 +88,8 @@ function createWindow() {
   win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
   // 실행 시 창을 바로 띄운다 (트레이 전용 앱이지만 첫 실행엔 보이는 게 자연스러움)
   win.once('ready-to-show', () => win.show());
-  win.on('close', (e) => { e.preventDefault(); win.hide(); });
+  // 닫기(X) 버튼 = 앱 완전 종료. 창만 숨기고 싶으면 트레이 아이콘 클릭.
+  win.on('close', () => app.quit());
 }
 
 function startHelper() {
@@ -117,5 +118,5 @@ app.whenReady().then(() => {
   createWindow();
   startHelper();
 });
-app.on('window-all-closed', () => { /* keep running in tray on macOS */ });
+app.on('window-all-closed', () => app.quit());
 app.on('before-quit', () => helper?.stop());
