@@ -1,5 +1,5 @@
 {
-  "name": "wispr-flow-clone",
+  "name": "klaktalk",
   "version": "0.1.0",
   "description": "Wispr Flow clone — push-to-talk voice dictation for macOS",
   "private": true,
@@ -22,8 +22,8 @@
     "electron-builder": "^26.15.3"
   },
   "build": {
-    "appId": "com.devnoyo0123.wispr-flow-clone",
-    "productName": "Wispr Flow Clone",
+    "appId": "com.devnoyo0123.klaktalk",
+    "productName": "KlakTalk",
     "asar": false,
     "files": [
       "src/**/*",
@@ -47,7 +47,7 @@
       "identity": null
     },
     "dmg": {
-      "title": "Wispr Flow Clone",
+      "title": "KlakTalk",
       "contents": [
         {
           "x": 130,

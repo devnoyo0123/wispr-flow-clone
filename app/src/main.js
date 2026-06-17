@@ -143,7 +143,7 @@ function createTray() {
     { type: 'separator' },
     { label: 'Quit', click: () => app.quit() },
   ]);
-  tray.setToolTip('Wispr Flow Clone');
+  tray.setToolTip('KlakTalk');
   tray.setContextMenu(menu);
   tray.on('click', () => (win?.isVisible() ? win.hide() : win.show()));
 }
@@ -153,7 +153,7 @@ function createWindow() {
     width: 480,
     height: 680,
     show: false,
-    title: 'Wispr Flow Clone',
+    title: 'KlakTalk',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

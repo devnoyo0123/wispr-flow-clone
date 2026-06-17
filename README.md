@@ -1,4 +1,4 @@
-# 🎙️ Wispr Flow Clone
+# 🎙️ KlakTalk
 
 macOS용 **push-to-talk 음성 받아쓰기** 데스크톱 앱. 단축키를 누른 채 말하면 → 로컬 [whisper.cpp](https://github.com/ggerganov/whisper.cpp) 로 한국어(또는 설정 언어) 변환 → 현재 커서 위치에 텍스트를 붙여넣고, 변환 기록을 **로컬 SQLite**에 저장합니다. 외부 클라우드/SaaS 없이 **전부 로컬**에서 동작합니다.
 
@@ -101,20 +101,20 @@ npm run dist          # → app/dist/ 에 .app + .dmg 생성
 ```
 
 결과:
-- `app/dist/Wispr Flow Clone-0.1.0-arm64.dmg` — 배포/설치용 디스크 이미지
-- `app/dist/mac-arm64/Wispr Flow Clone.app` — 앱 번들
+- `app/dist/KlakTalk-0.1.0-arm64.dmg` — 배포/설치용 디스크 이미지
+- `app/dist/mac-arm64/KlakTalk.app` — 앱 번들
 
 > 빌드 설정은 `app/package.json` 의 `build` 항목, 앱 아이콘은 `app/build/icon.svg` → `icon.icns` 를 수정하세요. 아이콘 재생성: `rsvg-convert -w 1024 build/icon.svg ...` → `iconutil -c icns` .
 
 ### 2. .dmg 로 설치 & 실행
 
-1. `Wispr Flow Clone-0.1.0-arm64.dmg` 를 **더블클릭**합니다.
+1. `KlakTalk-0.1.0-arm64.dmg` 를 **더블클릭**합니다.
 2. 열리는 창에서 🎙️ 앱 아이콘을 → **응용프로그램** 폴더로 **드래그**합니다.
 3. **첫 실행 — Gatekeeper 우회** (코드 서명을 안 했기 때문에 "확인할 수 없는 개발자" 경고가 뜹니다):
-   - 응용프로그램에서 **Wispr Flow Clone 을 우클릭 → 열기** → "열기" 클릭
-   - 또는 터미널: `xattr -cr "/Applications/Wispr Flow Clone.app"`
+   - 응용프로그램에서 **KlakTalk 을 우클릭 → 열기** → "열기" 클릭
+   - 또는 터미널: `xattr -cr "/Applications/KlakTalk.app"`
 4. **macOS 권한 재부여** ⚠️ — 설치한 `.app` 는 개발 모드(`npm start`)와 **다른 앱**으로 인식되므로 아래 권한을 **다시** 부여해야 합니다:
-   - 시스템 설정 → 개인정보 보호 및 보안 → **입력 모니터링 · 손쉬운 사용 · 마이크** (Wispr Flow Clone 에 ON)
+   - 시스템 설정 → 개인정보 보호 및 보안 → **입력 모니터링 · 손쉬운 사용 · 마이크** (KlakTalk 에 ON)
    - 부여 후 앱 **완전 재시작**
 
 이제 Launchpad / 독에서 🎙️ 아이콘 클릭으로 실행할 수 있습니다.
@@ -141,16 +141,16 @@ npm run dist          # → app/dist/ 에 .app + .dmg 생성
 
 macOS 앱은 별도의 uninstaller가 없습니다. 아래 절차로 수동 제거하세요.
 
-**1. 앱 삭제** — 응용프로그램 폴더에서 `Wispr Flow Clone.app`을 **휴지통**으로 드래그(또는 우클릭 → 휴지통).
+**1. 앱 삭제** — 응용프로그램 폴더에서 `KlakTalk.app`을 **휴지통**으로 드래그(또는 우클릭 → 휴지통).
 
 **2. 완전 제거** (설정·기록 DB까지 지울 때):
 ```bash
-rm -rf "/Applications/Wispr Flow Clone.app"
+rm -rf "/Applications/KlakTalk.app"
 rm -rf ~/Library/Application\ Support/Wispr\ Flow\ Clone/   # 설정 + wispr.db (기록)
 ```
 
 > 💡 개발 모드(`npm start`)의 설정/DB는 별도 경로에 있습니다:
-> `~/Library/Application Support/wispr-flow-clone/`
+> `~/Library/Application Support/klaktalk/`
 
 > ℹ️ whisper.cpp 모델 파일은 사용자가 직접 다운로드한 것이므로, 필요하면 `spike/models/*.bin`을 따로 지우세요.
 
@@ -169,7 +169,7 @@ rm -rf ~/Library/Application\ Support/Wispr\ Flow\ Clone/   # 설정 + wispr.db 
 
 기록 확인 (SQLite):
 ```bash
-sqlite3 ~/Library/Application\ Support/wispr-flow-clone/wispr.db \
+sqlite3 ~/Library/Application\ Support/klaktalk/wispr.db \
   'SELECT id, created_at, substr(text,1,40) FROM transcriptions ORDER BY id DESC LIMIT 10;'
 ```
 
