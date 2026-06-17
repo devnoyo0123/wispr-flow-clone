@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';" />
+  <title>Wispr Flow Clone</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="title">🎙️ Wispr Flow</div>
+    <div id="status" class="status">…</div>
+  </header>
+
+  <section class="settings">
+    <div class="row">
+      <label for="hotkey">단축키 (홀드=녹음)</label>
+      <select id="hotkey">
+        <option value="rightCmd">Right Command ⌘</option>
+        <option value="rightOption">Right Option ⌥</option>
+        <option value="leftCmd">Left Command ⌘</option>
+        <option value="leftOption">Left Option ⌥</option>
+        <option value="rightControl">Right Control ⌃</option>
+        <option value="leftControl">Left Control ⌃</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="modelPath">Whisper 모델 경로</label>
+      <div class="inline">
+        <input id="modelPath" type="text" spellcheck="false" />
+        <button id="saveModel">저장</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="history">
+    <div class="history-head">변환 기록 <span id="count" class="count"></span></div>
+    <ul id="list"></ul>
+    <div id="empty" class="empty">아직 기록이 없습니다. 단축키를 누르고 말해보세요.</div>
+  </section>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "wispr-flow-clone",
+  "version": "0.1.0",
+  "description": "Wispr Flow clone — push-to-talk voice dictation for macOS",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "build:helper": "swiftc native/wispr-helper.swift -o native/wispr-helper -framework Cocoa -framework AVFoundation",
+    "db:up": "(cd .. && docker compose up -d db)",
+    "db:down": "(cd .. && docker compose down)",
+    "db:init": "(cd .. && docker compose down -v && docker compose up -d db)",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}

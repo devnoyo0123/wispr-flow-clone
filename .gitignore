@@ -1,0 +1,32 @@
+# deps
+node_modules/
+package-lock.json
+
+# build artifacts
+app/native/wispr-helper
+*.o
+
+# recordings / temp
+*.wav
+recordings/
+
+# whisper models (large, downloaded separately)
+models/*.bin
+spike/models/*.bin
+spike/rec.wav
+spike/tap
+spike/ptt-tap
+spike/record
+
+# electron
+dist/
+out/
+
+# env / os
+.env
+.DS_Store
+
+# tooling state (oh-my-claudecode / editor)
+.omc/
+.idea/
+*.log

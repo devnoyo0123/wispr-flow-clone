@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:16
+    container_name: wispr-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: wispr
+      POSTGRES_PASSWORD: wispr
+      POSTGRES_DB: wispr
+    ports:
+      - "55432:5432"
+    volumes:
+      - wispr-pgdata:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+
+volumes:
+  wispr-pgdata:

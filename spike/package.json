@@ -1,0 +1,10 @@
+{
+  "name": "wispr-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Risk spike: global push-to-talk keydown/keyup + paste into cursor",
+  "dependencies": {
+    "uiohook-napi": "^1.5.5"
+  }
+}
