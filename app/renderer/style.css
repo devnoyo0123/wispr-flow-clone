@@ -45,3 +45,4 @@ button:hover { background: #2f5bd6; }
 .when { font-size: 11px; color: #6a6a72; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
 .txt { font-size: 14px; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
 .empty { padding: 24px 16px; color: #6a6a72; font-size: 13px; text-align: center; }
+.sentinel { height: 1px; }

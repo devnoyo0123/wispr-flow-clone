@@ -70,7 +70,7 @@ async function loadMore() {
   if (sentinel && 'IntersectionObserver' in window) {
     const io = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting) loadMore();
-    }, { rootMargin: '200px' });
+    }, { root: document.querySelector('.history'), rootMargin: '200px' });
     io.observe(sentinel);
   }
 
