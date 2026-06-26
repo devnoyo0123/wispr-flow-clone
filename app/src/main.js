@@ -6,6 +6,8 @@ const db = require('./db');
 const { transcribe } = require('./transcriber');
 const { HelperBridge } = require('./helper-bridge');
 const model = require('./model-downloader');
+const ttsServer = require('./server');
+const tts = require('./tts');
 
 let tray, win, overlay, helper;
 let busy = false;
@@ -141,6 +143,8 @@ function createTray() {
   const menu = Menu.buildFromTemplate([
     { label: 'Open Wispr', click: () => win?.show() },
     { type: 'separator' },
+    { label: '🔇 음성 읽기 중지', click: () => tts.stop() },
+    { type: 'separator' },
     { label: 'Quit', click: () => app.quit() },
   ]);
   tray.setToolTip('KlakTalk');
@@ -196,6 +200,17 @@ ipcMain.handle('config:setHotkey', (_e, name) => {
   return true;
 });
 ipcMain.handle('config:setModelPath', (_e, p) => { config.set('modelPath', p); return true; });
+ipcMain.handle('config:setTtsEnabled', (_e, enabled) => { config.set('ttsEnabled', !!enabled); return true; });
+ipcMain.handle('config:setTtsVoice', (_e, v) => { config.set('ttsVoice', v || ''); return true; });
+ipcMain.handle('config:setTtsRate', (_e, r) => { config.set('ttsRate', Number(r) || 1.0); return true; });
+ipcMain.handle('config:setTtsPort', (_e, p) => { config.set('ttsPort', parseInt(p, 10) || 4783); return true; });
+ipcMain.handle('tts:listVoices', async () => tts.listVoices());
+ipcMain.handle('tts:test', (_e, opts = {}) => {
+  tts.speak(opts.text || '테스트 음성입니다.', opts);
+  return true;
+});
+ipcMain.handle('tts:stop', () => { tts.stop(); return true; });
+ipcMain.handle('server:port', () => ttsServer.getPort());
 
 app.whenReady().then(async () => {
   createTray();
@@ -203,6 +218,7 @@ app.whenReady().then(async () => {
   createOverlay();
   await ensureModel();   // 모델 준비 (필요시 자동 다운로드)
   startHelper();
+  await ttsServer.start();
 });
 app.on('window-all-closed', () => app.quit());
-app.on('before-quit', () => helper?.stop());
+app.on('before-quit', () => { helper?.stop(); ttsServer.stop(); });

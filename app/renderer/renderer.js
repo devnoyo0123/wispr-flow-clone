@@ -62,6 +62,15 @@ async function loadMore() {
   $('hotkey').value = settings.hotkey;
   $('modelPath').value = settings.modelPath || '';
 
+  $('ttsEnabled').checked = !!settings.ttsEnabled;
+  $('ttsEnabledLabel').textContent = settings.ttsEnabled ? '켜짐' : '꺼짐';
+  $('ttsPort').value = settings.ttsPort ?? 4783;
+
+  const boundPort = await window.api.getServerPort();
+  if (boundPort && boundPort !== settings.ttsPort) {
+    $('ttsPortInfo').textContent = `실제: ${boundPort}`;
+  }
+
   await loadMore();
   if (loaded === 0) $('empty').style.display = 'block';
 
@@ -80,6 +89,28 @@ async function loadMore() {
   $('saveModel').addEventListener('click', () => {
     window.api.setModelPath($('modelPath').value.trim());
     $('status').textContent = 'model path saved';
+  });
+
+  // TTS 이벤트
+  $('ttsEnabled').addEventListener('change', (e) => {
+    const enabled = e.target.checked;
+    window.api.setTtsEnabled(enabled);
+    $('ttsEnabledLabel').textContent = enabled ? '켜짐' : '꺼짐';
+  });
+  $('ttsPort').addEventListener('change', (e) => {
+    const port = parseInt(e.target.value, 10);
+    if (port >= 1024 && port <= 65535) {
+      window.api.setTtsPort(port);
+      $('status').textContent = 'port saved — 재시작 시 적용';
+    }
+  });
+  $('testTts').addEventListener('click', () => {
+    window.api.testTts({});
+    $('status').textContent = 'tts test';
+  });
+  $('stopTts').addEventListener('click', () => {
+    window.api.stopTts();
+    $('status').textContent = '음성 중지';
   });
 
   window.api.onTranscriptionAdded((row) => prependRow(row));

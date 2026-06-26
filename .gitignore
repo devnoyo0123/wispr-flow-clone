@@ -31,3 +31,9 @@ out/
 .omc/
 .idea/
 *.log
+
+# tts-server (separate dev environment — not bundled into DMG)
+app/tts-server/
+
+# local handoff / working notes
+app/HANDOFF.md

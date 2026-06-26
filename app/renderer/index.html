@@ -9,7 +9,10 @@
 <body>
   <header class="topbar">
     <div class="title">🎙️ KlakTalk</div>
-    <div id="status" class="status">…</div>
+    <div class="topbar-right">
+      <div id="status" class="status">…</div>
+      <button id="stopTts" class="icon-btn" title="음성 중지">🔇</button>
+    </div>
   </header>
 
   <section class="settings">
@@ -29,6 +32,27 @@
       <div class="inline">
         <input id="modelPath" type="text" spellcheck="false" />
         <button id="saveModel">저장</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="settings tts-settings">
+    <div class="row">
+      <label>외부 응답 TTS — Supertonic v3</label>
+      <div class="inline toggle-row">
+        <label class="switch">
+          <input id="ttsEnabled" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+        <span id="ttsEnabledLabel" class="hint">꺼짐</span>
+        <span id="ttsPortInfo" class="hint port-info"></span>
+      </div>
+    </div>
+    <div class="row">
+      <label for="ttsPort">서버 포트</label>
+      <div class="inline">
+        <input id="ttsPort" type="number" min="1024" max="65535" />
+        <button id="testTts">테스트</button>
       </div>
     </div>
   </section>
